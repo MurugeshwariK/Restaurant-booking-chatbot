@@ -1,0 +1,45 @@
+function quick(text) {
+    document.getElementById("msg").value = text;
+    send();
+}
+
+
+async function send() {
+
+    let input = document.getElementById("msg");
+    let msg   = input.value.trim();
+
+    if (!msg) return;
+
+    let box = document.getElementById("box");
+
+    box.innerHTML += `<div class='user'>${msg}</div>`;
+
+    input.value = "";
+    scrollDown();
+
+    let typingId = "typing_" + Date.now();
+    box.innerHTML += `<div class='bot' id='${typingId}'>...</div>`;
+    scrollDown();
+
+    try {
+
+        let res  = await fetch(`http://127.0.0.1:8000/chat?message=${encodeURIComponent(msg)}`);
+        let data = await res.json();
+
+        document.getElementById(typingId).innerText = data.reply;
+
+    } catch (e) {
+
+        document.getElementById(typingId).innerText =
+            "Connection error. Make sure the backend server is running.\n\nRun: uvicorn main:app --reload";
+    }
+
+    scrollDown();
+}
+
+
+function scrollDown() {
+    let box = document.getElementById("box");
+    box.scrollTop = box.scrollHeight;
+}
